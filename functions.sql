@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION transaction_timeslice_jensen(val INT)
+CREATE OR REPLACE FUNCTION test_jensen(val INT)
 RETURNS TABLE(
 	customer_id INT,
 	customer_name TEXT,
@@ -30,11 +30,11 @@ BEGIN
 			   (rec1."Ve" = rec2."Ve") AND (rec1."T" <= rec2."T") AND rec1."Op" = 'I' AND rec2."Op" = 'D' THEN
 
 			   EXECUTE format(
-			   	'INSERT INTO result VALUES (%s, ''%s'', %s, %s, ''%s'')',
+			   	'INSERT INTO result VALUES (%s, ''%s'', %s, %s, %s, ''%s'')',
 			   	rec1.customer_id, rec1.customer_name, rec1.property_number, rec1."Vs", rec1."Ve", rec1."Op");
 
 			   EXECUTE format(
-			   	'INSERT INTO result VALUES (%s, ''%s'', %s, %s, ''%s'')',
+			   	'INSERT INTO result VALUES (%s, ''%s'', %s, %s, %s, ''%s'')',
 			   	rec2.customer_id, rec2.customer_name, rec2.property_number, rec2."Vs", rec2."Ve", rec2."Op");
 
 			END IF;
