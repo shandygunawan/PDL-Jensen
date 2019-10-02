@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION test_jensen(val INT)
+CREATE OR REPLACE FUNCTION timeslice_transaction_jensen(val INT)
 RETURNS TABLE(
 	customer_id INT,
 	customer_name TEXT,
@@ -20,7 +20,7 @@ BEGIN
 	/* 2) Tuple with Op I but T > val */
 	EXECUTE format(
 		'CREATE TEMP TABLE tmp ON COMMIT DROP AS
-		SELECT * FROM property_ownership WHERE ("Op" = ''I'' AND "T" <= %s) OR ("Op" = ''D'' AND "T" > %s) ', val, val);
+		SELECT * FROM property_ownership WHERE ("Op" = ''I'' AND "T" <= %s) OR ("Op" = ''D'' AND "T" >= %s) ', val, val);
 	
 	/* SEARCH RESULT */
 	EXECUTE 'CREATE TEMP TABLE result( customer_id INT, customer_name TEXT, property_number INT, Vs INT, Ve INT, Op TEXT) ON COMMIT DROP';
@@ -44,5 +44,26 @@ BEGIN
 	END LOOP;
 
 	RETURN QUERY SELECT * FROM result;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION timeslice_valid_jensen(val INT)
+RETURNS TABLE(
+	customer_id INT,
+	customer_name TEXT,
+	property_number INT,
+	T INT,
+	Op TEXT
+)
+LANGUAGE 'plpgsql'
+AS $$
+BEGIN
+	RETURN QUERY SELECT property_ownership.customer_id, 
+						property_ownership.customer_name, 
+						property_ownership.property_number, 
+						property_ownership."T", 
+						property_ownership."Op"
+				 FROM property_ownership
+				 WHERE "Vs" <= val AND "Ve" >= val;
 END;
 $$;
