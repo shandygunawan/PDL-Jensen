@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION set_difference_jensen(table1 TEXT, table2 TEXT)
+CREATE OR REPLACE FUNCTION set_difference_jensen(table1_name TEXT, table2_name TEXT)
 RETURNS TABLE(
 	customer_id INT,
 	customer_name TEXT,
@@ -12,19 +12,21 @@ LANGUAGE 'plpgsql'
 AS $$
 DECLARE
 	rec1 RECORD;
-	/* rec2 RECORD; */
-	is_exist BOOLEAN;
+	rec2 RECORD;
 BEGIN
 	EXECUTE 'CREATE TEMP TABLE result( customer_id INT, customer_name TEXT, property_number INT, Vs INT, Ve INT, T INT, Op TEXT) ON COMMIT DROP';
 
+	EXECUTE format('CREATE TEMP TABLE table1 ON COMMIT DROP AS SELECT * FROM %s', table1_name);
+	EXECUTE format('CREATE TEMP TABLE table2 ON COMMIT DROP AS SELECT * FROM %s', table2_name);
+
 	FOR rec1 IN SELECT * FROM table1 LOOP
 		
-		/* Check if rec1 exist in table2 (Vs, Ve, Op are same) */
-		rec2 := (SELECT * FROM table2 
+		/* Check if rec1 exist in table2 */
+		SELECT * INTO rec2 FROM table2
 				 WHERE (rec1.customer_id = table2.customer_id) 
 				   		AND (rec1.property_number = table2.property_number)
 				   		AND (rec1."Vs" = table2."Vs") AND (rec1."Ve" = table2."Ve") 
-				   		AND (rec1."Op" = table2."Op"))
+				   		AND (rec1."Op" = table2."Op") LIMIT 1;
 
 		/* Insert record to result tablefrom table1 if it doesn't exist in table2  */
 		IF rec2 IS NULL THEN
@@ -35,7 +37,7 @@ BEGIN
 			/* IF the records is same but the T is different */
 			/* IF rec1.T > rec2.T THEN don't need to put it to result table */
 			/* IF rec1.T < rec2.T THEN insert both of them to result table but change rec2.Op to 'D' */ 
-			IF (rec1."T" <= rec2."T") THEN
+			IF (rec1."T" < rec2."T") THEN
 				EXECUTE format(
 			   	'INSERT INTO result VALUES (%s, ''%s'', %s, %s, %s, %s, ''%s'')',
 			   	rec1.customer_id, rec1.customer_name, rec1.property_number, rec1."Vs", rec1."Ve", rec1."T", rec1."Op");
