@@ -25,9 +25,12 @@ BEGIN
 	/* SEARCH RESULT */
 	EXECUTE 'CREATE TEMP TABLE result( customer_id INT, customer_name TEXT, property_number INT, Vs INT, Ve INT, Op TEXT) ON COMMIT DROP';
 	FOR rec1 IN SELECT * FROM tmp LOOP
+
+		CONTINUE WHEN rec1."Op" != 'I';
+
 		FOR rec2 IN SELECT * FROM tmp LOOP
 			IF (rec1.customer_id = rec2.customer_id) AND (rec1.property_number = rec2.property_number) AND (rec1."Vs" = rec2."Vs") AND
-			   (rec1."Ve" = rec2."Ve") AND (rec1."T" <= rec2."T") AND rec1."Op" = 'I' AND rec2."Op" = 'D' THEN
+			   (rec1."Ve" = rec2."Ve") AND (rec1."T" <= rec2."T") AND rec2."Op" = 'D' THEN
 
 			   EXECUTE format(
 			   	'INSERT INTO result VALUES (%s, ''%s'', %s, %s, %s, ''%s'')',
