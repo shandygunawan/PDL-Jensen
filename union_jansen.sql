@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION union_jansen(_tblname1 text, _tblname2 text)
+CREATE OR REPLACE FUNCTION union_jensen(_tblname1 text, _tblname2 text)
 	RETURNS TABLE (customer_id int, customer_name text, property_number int, vs int, ve int, t int, op text) AS $$
 	
 	BEGIN
