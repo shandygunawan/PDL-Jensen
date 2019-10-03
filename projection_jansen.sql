@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION projection_jansen(_cols text)
+CREATE OR REPLACE FUNCTION projection_jensen(_cols text)
 	RETURNS SETOF record AS $$
  	BEGIN
  		RETURN QUERY EXECUTE 'SELECT ' || _cols || ', "vs", "ve", "t", "op" FROM property_ownership';
