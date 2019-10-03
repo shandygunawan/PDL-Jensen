@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION selection_jansen(cond text)
+CREATE OR REPLACE FUNCTION selection_jensen(cond text)
 	RETURNS SETOF property_ownership AS $$
 	
 	BEGIN
