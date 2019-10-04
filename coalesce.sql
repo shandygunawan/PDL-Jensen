@@ -19,7 +19,7 @@
 --  		and (a2.vs < fi.vs and fi.vs <= a2.ve or a2.vs <= la.ve and la.ve < a2.ve))
 -- order by fi.vs
 
-CREATE OR REPLACE FUNCTION coalesce_jansen(_tbl text)
+CREATE OR REPLACE FUNCTION coalesce_jensen(_tbl text)
 RETURNS TABLE(
 	customer_id INT,
 	customer_name TEXT,
