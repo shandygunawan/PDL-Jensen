@@ -54,10 +54,10 @@ BEGIN
 				IF ((SELECT COUNT(*) FROM t_latest_records LIMIT 1) = 0) THEN
 					DROP TABLE t_latest_records;
 					RAISE EXCEPTION 'No previous record exist.';
-				ELSIF ((SELECT "Op" FROM t_latest_records LIMIT 1) = 'I') THEN
+				ELSIF ((SELECT Op FROM t_latest_records LIMIT 1) = 'I') THEN
 					DROP TABLE t_latest_records;
 					EXECUTE format('INSERT INTO %s VALUES (%s, ''D'');', t_name, REPLACE(REPLACE(t_data, ';', ', '), '"', ''''));
-				ELSIF ((SELECT "Op" FROM t_latest_records LIMIT 1) = 'D') THEN
+				ELSIF ((SELECT Op FROM t_latest_records LIMIT 1) = 'D') THEN
 					DROP TABLE t_latest_records;
 					RAISE EXCEPTION 'The latest record of data has bounded transaction time.';
 				END IF;
