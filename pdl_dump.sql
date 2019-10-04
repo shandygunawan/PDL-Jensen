@@ -784,11 +784,11 @@ BEGIN
 					END LOOP;
 					
 					DROP TABLE t_latest_records;
-					CALL delete_jansen(t_name, temp_parameter);
-					CALL insert_jansen(t_name, t_data);
+					CALL delete_jensen(t_name, temp_parameter);
+					CALL insert_jensen(t_name, t_data);
 				ELSIF ((SELECT Op FROM t_latest_records LIMIT 1) = 'D') THEN
 					DROP TABLE t_latest_records;
-					CALL insert_jansen(t_name, t_data);
+					CALL insert_jensen(t_name, t_data);
 				END IF;
 			ELSE
 				RAISE EXCEPTION 'Inserted tuple does not have the same column count.';
