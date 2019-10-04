@@ -309,6 +309,40 @@ $$;
 ALTER FUNCTION public.allen_relationship_starts(t1_start integer, t1_end integer, t2_start integer, t2_end integer) OWNER TO postgres;
 
 --
+-- Name: coalesce_jensen(text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.coalesce_jensen(_tbl text) RETURNS TABLE(customer_id integer, customer_name text, property_number integer, vs integer, ve integer, t integer, op text)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+RETURN QUERY EXECUTE 'select distinct fi.customer_id, fi.customer_name, fi.property_number, fi.vs, la.ve, fi.t, fi.op
+from ' || _tbl || ' fi, ' || _tbl || ' la
+where fi.vs < la.ve
+and la.customer_id = fi.customer_id AND la.customer_name = fi.customer_name AND la.property_number = fi.property_number
+and not exists (
+select *
+ from ' || _tbl || ' mi
+ where mi.customer_id = fi.customer_id AND mi.customer_name = fi.customer_name AND mi.property_number = fi.property_number
+ and fi.vs < mi.vs and mi.vs < la.ve
+ and not exists (
+ select *
+ from ' || _tbl || ' a1
+ where a1.customer_id = fi.customer_id AND a1.customer_name = fi.customer_name AND a1.property_number = fi.property_number
+ and a1.vs < mi.vs and mi.vs <= a1.ve))
+ and not exists (
+ select *
+ from ' || _tbl || ' a2
+ where a2.customer_id = fi.customer_id AND a2.customer_name = fi.customer_name AND a2.property_number = fi.property_number
+ and (a2.vs < fi.vs and fi.vs <= a2.ve or a2.vs <= la.ve and la.ve < a2.ve))
+order by fi.vs';
+END;
+$$;
+
+
+ALTER FUNCTION public.coalesce_jensen(_tbl text) OWNER TO postgres;
+
+--
 -- Name: delete_jensen(character varying, character varying); Type: PROCEDURE; Schema: public; Owner: postgres
 --
 
@@ -810,6 +844,10 @@ COPY public.property_condition (property_number, condition, vs, ve, t, op) FROM 
 7797	Good	12	14	15	I
 2109	Very Good	14	15	18	I
 7797	Quiet Good	12	14	17	I
+7797	Very Good	5	7	12	I
+7797	Good	12	14	15	I
+2109	Very Good	14	15	18	I
+7797	Quiet Good	12	14	17	I
 \.
 
 
@@ -830,6 +868,18 @@ COPY public.property_ownership (customer_id, customer_name, property_number, vs,
 145	Eva Nielsen	7797	5	14	26	I
 827	Peter Olsen	7797	15	19	28	D
 827	Peter Olsen	7797	12	19	28	I
+145	Eva Nielsen	7797	10	9999	10	I
+145	Eva Nielsen	7797	10	9999	15	D
+145	Eva Nielsen	7797	10	14	15	I
+827	Peter Olsen	7797	15	9999	15	I
+827	Peter Olsen	7797	15	9999	20	D
+827	Peter Olsen	7797	15	19	20	I
+145	Eva Nielsen	7797	10	14	23	D
+145	Eva Nielsen	7797	3	14	23	I
+145	Eva Nielsen	7797	3	14	26	D
+145	Eva Nielsen	7797	5	14	26	I
+827	Peter Olsen	7797	15	19	28	D
+827	Peter Olsen	7797	12	19	28	I
 \.
 
 
@@ -838,6 +888,7 @@ COPY public.property_ownership (customer_id, customer_name, property_number, vs,
 --
 
 COPY public.property_ownership_2 (customer_id, customer_name, property_number, vs, ve, t, op) FROM stdin;
+145	Eva Nielsen	7797	10	9999	10	I
 145	Eva Nielsen	7797	10	9999	10	I
 145	Eva Nielsen	7797	10	14	16	I
 \.
